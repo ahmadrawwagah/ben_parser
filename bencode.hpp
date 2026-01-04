@@ -110,25 +110,28 @@ struct ben_list : ben_item {
 struct ben_map : ben_item {
 	std::unordered_map<std::string, std::unique_ptr<ben_item>> val;
 	std::vector<std::string> orig_key_order;
+	
 	explicit ben_map(std::unordered_map<std::string, std::unique_ptr<ben_item>> val): val(std::move(val))  {}
+
+
 
 	std::string to_string() override{
 		std::string s;
 		s += "{";
-		for (const auto& pair: val){
-			s += std::format("Key: {} Value: {}\n", pair.first, pair.second->to_string());
+		for (const auto& key: orig_key_order){
+			auto& value = val[key];
+			s += std::format("Key: {} Value: {}\n", key, value->to_string());
 		}
-		s += "}\n";
+		s += "}";
 		return s;
 	}
-	
+
 	std::string to_ben_string() override{
 		std::string s;
 		s += "d";
 		for (const auto& key: orig_key_order){
 			auto& value = val[key];
 			s += std::format("{}:{}{}", key.length(), key, value->to_ben_string());
-			//i hate this function
 		}
 		s += "e";
 		return s;

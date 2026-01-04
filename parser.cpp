@@ -100,7 +100,7 @@ int main(){
 	buffer << meta_file.rdbuf();
 	std::unique_ptr<ben_map> ben_map = parse_file(buffer.str());
 	if (ben_map != nullptr) {
-		// std::cout << ben_map->to_string() << std::endl;
+		std::cout << ben_map->to_string() << std::endl;
 	}
 	std::cout << ben_map->to_ben_string();
 	return 1;
