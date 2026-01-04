@@ -1,3 +1,10 @@
 a.out
 *.torrent
 *.o
+.cache/**
+ben_parser
+CMakeFiles/**
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+compile_commands.json
