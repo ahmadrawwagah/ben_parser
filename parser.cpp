@@ -10,7 +10,7 @@ std::string parse_next_string(std::string::iterator& cur){
 	auto before = cur;
 	auto llen = 0;
 	while (*cur++ != ':'){llen++;}
-	int64_t length = std::stoi(std::string{before, cur});
+	int64_t length = std::stol(std::string{before, cur});
 	cur += length;
 	return {before + llen + 1, cur};
 }
@@ -27,12 +27,13 @@ std::unique_ptr<ben_item> decode(std::string::iterator& cur){
 		case ben_type_begin::list: {
 			return process_list(++cur);
 		}
-		case ben_type_begin::STRING: {
+		case ben_type_begin::string: {
 			return std::make_unique<ben_string>(parse_next_string(cur));
 		}
-		default:
-			return nullptr;
+		case ben_type_begin::UNKNOWN:
+			return nullptr; //this should prob throw instead lowkey
 	}
+	return nullptr;
 }
 
 
@@ -68,6 +69,7 @@ std::unique_ptr<ben_map> process_map(std::string::iterator& cur){
 	auto map = std::make_unique<ben_map>(std::unordered_map<std::string, std::unique_ptr<ben_item>>{});
 	while (*cur != ben_type_end){
 		auto pair = decode_pair(cur);
+		map->orig_key_order.emplace_back(pair.first);
 		map->val[pair.first] = std::move(pair.second);
 	}
 	cur++;
@@ -84,21 +86,23 @@ std::unique_ptr<ben_map> parse_file(std::string file){
 			}
 			default:{
 				std::cout << "what the heck" << std::endl;
-				break;
+				return nullptr;
 			}
 		}
-		break;
 	}
 	return nullptr;
 }
 
 
 int main(){
-	std::ifstream f("test.torrent");
+	std::ifstream meta_file("test.torrent");
 	std::stringstream buffer;
-	buffer << f.rdbuf();
+	buffer << meta_file.rdbuf();
 	std::unique_ptr<ben_map> ben_map = parse_file(buffer.str());
-	std::cout << ben_map->toString() << std::endl;
-	return 0;
+	if (ben_map != nullptr) {
+		// std::cout << ben_map->to_string() << std::endl;
+	}
+	std::cout << ben_map->to_ben_string();
+	return 1;
 }
 

@@ -1,0 +1,18 @@
+---
+Checks: "*,
+        -llvm*,
+        -modernize-use-trailing-return-type,
+        -misc-non-private-member-variables-in-classes,
+        -hicpp-special-member-functions,
+        -cppcoreguidelines-special-member-functions,
+        -performance-avoid-endl,
+        -altera-struct-pack-align,
+        -readability-identifier-length,
+        -altera-struct-pack-align,
+        -altera-unroll-loops,
+        -misc-no-recursion,
+        -fuchsia-default-arguments-calls
+"
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle:     none
