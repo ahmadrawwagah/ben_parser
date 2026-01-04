@@ -1,9 +1,7 @@
 #include <iostream>
 #include <memory>
-#include <sstream>
-#include <fstream>
 #include <vector>
-#include "parser.hpp"
+#include "bencode.hpp"
 
 
 std::string parse_next_string(std::string::iterator& cur){
@@ -92,17 +90,3 @@ std::unique_ptr<ben_map> parse_file(std::string file){
 	}
 	return nullptr;
 }
-
-
-int main(){
-	std::ifstream meta_file("test.torrent");
-	std::stringstream buffer;
-	buffer << meta_file.rdbuf();
-	std::unique_ptr<ben_map> ben_map = parse_file(buffer.str());
-	if (ben_map != nullptr) {
-		std::cout << ben_map->to_string() << std::endl;
-	}
-	std::cout << ben_map->to_ben_string();
-	return 1;
-}
-
