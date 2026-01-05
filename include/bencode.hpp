@@ -4,7 +4,7 @@ static_assert(true);
 #include <memory>
 #include <format>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 enum ben_type_begin : char {
@@ -116,19 +116,17 @@ struct  ben_list : ben_node<ben_list> {
 };
 
 struct  ben_map : ben_node<ben_map> {
-	std::unordered_map<std::string, std::unique_ptr<ben_item>> val;
-	std::vector<std::string> orig_key_order;
+	std::map<std::string, std::unique_ptr<ben_item>> val;
 	
-	explicit ben_map(std::unordered_map<std::string, std::unique_ptr<ben_item>> val): val(std::move(val))  {}
+	explicit ben_map(std::map<std::string, std::unique_ptr<ben_item>> val): val(std::move(val))  {}
 
 
 
 	[[nodiscard]] std::string to_string_impl() const{
 		std::string s;
 		s += "{";
-		for (const auto& key: orig_key_order){
-			const auto& value = val.at(key);
-			s += std::format("Key: {} Value: {}\n", key, value->to_string());
+		for (const auto& pair: val){
+			s += std::format("Key: {} Value: {}\n", pair.first, pair.second->to_string());
 		}
 		s += "}";
 		return s;
@@ -137,9 +135,8 @@ struct  ben_map : ben_node<ben_map> {
 	[[nodiscard]] std::string to_ben_string_impl() const{
 		std::string s;
 		s += "d";
-		for (const auto& key: orig_key_order){
-			const auto& value = val.at(key);
-			s += std::format("{}:{}{}", key.length(), key, value->to_ben_string());
+		for (const auto& pair: val){
+			s += std::format("{}:{}{}", pair.first.length(), pair.first, pair.second->to_ben_string());
 		}
 		s += "e";
 		return s;
@@ -155,4 +152,7 @@ std::unique_ptr<ben_item> decode(std::string::iterator& cur);
 std::pair<std::string, std::unique_ptr<ben_item>> decode_pair(std::string::iterator& cur);
 std::string parse_next_string(std::string::iterator& cur);
 std::unique_ptr<ben_map> parse_file(std::string file);
+
+template <typename Ben_Type, typename Parser>
+std::unique_ptr<Ben_Type> parse(std::string::iterator& cur, Parser& p);
 

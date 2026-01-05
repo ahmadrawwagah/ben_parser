@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 #include "bencode.hpp"
 
@@ -17,21 +18,28 @@ std::string parse_next_string(std::string::iterator& cur){
 std::unique_ptr<ben_item> decode(std::string::iterator& cur){
 	switch (fromChar(*cur)){
 		case ben_type_begin::integer: {
-			return process_int(++cur);
+			return parse<ben_int>(++cur, process_int);
 		}
 		case ben_type_begin::dict: {
-			return process_map(++cur);
+			return parse<ben_map>(++cur, process_map);
 		}
 		case ben_type_begin::list: {
-			return process_list(++cur);
+			return parse<ben_list>(++cur, process_list);
 		}
 		case ben_type_begin::string: {
 			return std::make_unique<ben_string>(parse_next_string(cur));
 		}
 		case ben_type_begin::UNKNOWN:
-			return nullptr; //this should prob throw instead lowkey
+		throw std::runtime_error("Parser Error");
 	}
 	return nullptr;
+}
+
+template <typename Ben_Type, typename Parser>
+std::unique_ptr<Ben_Type> parse(std::string::iterator& cur, Parser& p){
+	auto res = p(cur);
+	if (!res) {throw std::runtime_error("Parser Error");}
+	return res;
 }
 
 
@@ -64,10 +72,9 @@ std::pair<std::string, std::unique_ptr<ben_item>> decode_pair(std::string::itera
 
 
 std::unique_ptr<ben_map> process_map(std::string::iterator& cur){
-	auto map = std::make_unique<ben_map>(std::unordered_map<std::string, std::unique_ptr<ben_item>>{});
+	auto map = std::make_unique<ben_map>(std::map<std::string, std::unique_ptr<ben_item>>{});
 	while (*cur != ben_type_end){
 		auto pair = decode_pair(cur);
-		map->orig_key_order.emplace_back(pair.first);
 		map->val[pair.first] = std::move(pair.second);
 	}
 	cur++;
