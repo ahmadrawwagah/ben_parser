@@ -77,15 +77,13 @@ std::unique_ptr<ben_map> process_map(std::string::iterator& cur){
 
 std::unique_ptr<ben_map> parse_file(std::string file){
 	auto cur = file.begin();
-	while (cur != file.end()){
-		switch (fromChar(*cur)) {
-			case ben_type_begin::dict: {
-				return process_map(++cur);
-			}
-			default:{
-				std::cout << "what the heck" << std::endl;
-				return nullptr;
-			}
+	switch (fromChar(*cur)) {
+		case ben_type_begin::dict: {
+			return process_map(++cur);
+		}
+		default:{
+			std::cout << "what the heck" << std::endl;
+			return nullptr;
 		}
 	}
 	return nullptr;

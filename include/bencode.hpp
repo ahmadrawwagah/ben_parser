@@ -46,45 +46,54 @@ struct ben_item {
 
 }; 
 
+template <typename Derived>
+struct ben_node : ben_item {
+	 std::string to_string() final {
+        return static_cast<const Derived*>(this)->to_string_impl();
+    }
 
-struct ben_int : ben_item {
+    std::string to_ben_string() final {
+        return static_cast<const Derived*>(this)->to_ben_string_impl();
+    }
+};
+
+
+struct ben_int : ben_node<ben_int> {
 	int64_t val;
  	
 	explicit ben_int(int64_t val): val(val) {}
  	
- 	std::string to_string() override {
+ 	[[nodiscard]] std::string to_string_impl() const {
     	return std::to_string(val);
     }
 	
-	std::string to_ben_string() override{
+	[[nodiscard]] std::string to_ben_string_impl() const {
 		return std::format("i{}e", val);
 	}
     
-    ~ben_int() override = default;
 };
 
-struct ben_string : ben_item {
+struct  ben_string : ben_node<ben_string> {
 	std::string val;
 
 	explicit ben_string(std::string val): val(std::move(val)) {}
 	
-	std::string to_string() override {
+	[[nodiscard]] std::string to_string_impl() const {
     	return val;
     }
 	
-	std::string to_ben_string() override{
+	[[nodiscard]] std::string to_ben_string_impl() const{
 		return std::format("{}:{}", val.length(), val);
 	}
     
-    ~ben_string() override = default;
 };
 
-struct ben_list : ben_item {
+struct  ben_list : ben_node<ben_list> {
 	std::vector<std::unique_ptr<ben_item>> val;
 	
 	explicit ben_list(std::vector<std::unique_ptr<ben_item>> val): val(std::move(val)) {}
 
-	std::string to_string() override{
+	[[nodiscard]] std::string to_string_impl() const{
 		std::string s;
 		s += "[ ";
 		for (const auto& val : val) {
@@ -94,7 +103,7 @@ struct ben_list : ben_item {
     	return s;
 	}
 	
-	std::string to_ben_string() override{
+	[[nodiscard]] std::string to_ben_string_impl() const{
 		std::string s;
 		s += "l";
 		for (const auto& val : val) {
@@ -104,10 +113,9 @@ struct ben_list : ben_item {
     	return s;
 	}
     
-    ~ben_list() override = default;
 };
 
-struct ben_map : ben_item {
+struct  ben_map : ben_node<ben_map> {
 	std::unordered_map<std::string, std::unique_ptr<ben_item>> val;
 	std::vector<std::string> orig_key_order;
 	
@@ -115,28 +123,27 @@ struct ben_map : ben_item {
 
 
 
-	std::string to_string() override{
+	[[nodiscard]] std::string to_string_impl() const{
 		std::string s;
 		s += "{";
 		for (const auto& key: orig_key_order){
-			auto& value = val[key];
+			const auto& value = val.at(key);
 			s += std::format("Key: {} Value: {}\n", key, value->to_string());
 		}
 		s += "}";
 		return s;
 	}
 
-	std::string to_ben_string() override{
+	[[nodiscard]] std::string to_ben_string_impl() const{
 		std::string s;
 		s += "d";
 		for (const auto& key: orig_key_order){
-			auto& value = val[key];
+			const auto& value = val.at(key);
 			s += std::format("{}:{}{}", key.length(), key, value->to_ben_string());
 		}
 		s += "e";
 		return s;
 	}
-    ~ben_map() override = default;
 
 };
 #pragma pack(pop)
