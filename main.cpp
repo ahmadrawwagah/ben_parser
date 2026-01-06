@@ -8,7 +8,7 @@ int main(){
 	std::stringstream buffer;
 	buffer << meta_file.rdbuf();
 	torrent torrent{buffer.str()};
-	std::cout << torrent.meta_info->to_string() << std::endl;
+	std::cout << torrent.to_string() << std::endl;
 	return 1;
 }
 

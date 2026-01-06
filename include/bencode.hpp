@@ -7,6 +7,8 @@ static_assert(true);
 #include <map>
 #include <vector>
 
+const int PIECE_HASH_LENGTH = 20;
+
 enum ben_type_begin : char {
 	dict = 'd',
 	integer = 'i',
@@ -57,6 +59,14 @@ struct ben_node : ben_item {
     }
 };
 
+template <typename T>
+T& expect(ben_item& item) {
+	if (auto* p = reinterpret_cast<T*>(&item)) {
+		return *p;
+	}
+	throw std::runtime_error("Type Mismatch");
+}
+//this is awful but i cant think of another way. i wish torrent meta files were stronger typed
 
 struct ben_int : ben_node<ben_int> {
 	int64_t val;
@@ -140,6 +150,12 @@ struct  ben_map : ben_node<ben_map> {
 		}
 		s += "e";
 		return s;
+	}
+
+
+	template <typename T>
+	T& get(const std::string& key) {
+		return expect<T>(*val.at(key));
 	}
 
 };

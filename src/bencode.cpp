@@ -32,7 +32,6 @@ std::unique_ptr<ben_item> decode(std::string::iterator& cur){
 		case ben_type_begin::UNKNOWN:
 		throw std::runtime_error("Parser Error");
 	}
-	return nullptr;
 }
 
 template <typename Ben_Type, typename Parser>
@@ -89,9 +88,10 @@ std::unique_ptr<ben_map> parse_file(std::string file){
 			return process_map(++cur);
 		}
 		default:{
-			std::cout << "what the heck" << std::endl;
-			return nullptr;
+			std::cout << "No Dictionary at Top Level of File" << std::endl;
+			throw std::runtime_error("Parser Error");
 		}
 	}
-	return nullptr;
 }
+
+
