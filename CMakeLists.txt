@@ -9,6 +9,6 @@ set(SOURCES
 )
 add_executable(ben_parser ${SOURCES})
 
-target_compile_options(ben_parser PUBLIC -std=c++20 -Wall -Wextra)
+target_compile_options(ben_parser PUBLIC -std=c++20 -Wall -Wextra -oFast)
 
 target_include_directories(ben_parser PUBLIC include/)
