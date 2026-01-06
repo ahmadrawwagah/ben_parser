@@ -61,7 +61,7 @@ struct ben_node : ben_item {
 
 template <typename T>
 T& expect(ben_item& item) {
-	if (auto* p = reinterpret_cast<T*>(&item)) {
+	if (auto* p = dynamic_cast<T*>(&item)) {
 		return *p;
 	}
 	throw std::runtime_error("Type Mismatch");
