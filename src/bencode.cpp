@@ -6,33 +6,37 @@
 
 
 std::string parse_next_string(std::string::iterator& cur){
-	auto before = cur;
-	auto llen = 0;
-	while (*cur++ != ':'){llen++;}
-	int64_t length = std::stol(std::string{before, cur});
-	cur += length;
-	return {before + llen + 1, cur};
+
+	auto len_begin = cur;
+    while (*cur != ':') {++cur;}
+    int64_t length = std::stol(std::string{len_begin, cur});
+    ++cur;
+    auto str_begin = cur;
+    cur += length;
+    return std::string{str_begin, cur};
 }
 
 
 std::unique_ptr<ben_item> decode(std::string::iterator& cur){
 	switch (fromChar(*cur)){
 		case ben_type_begin::integer: {
-			return parse<ben_int>(++cur, process_int);
+			return parse<ben_int>(cur, process_int);
 		}
 		case ben_type_begin::dict: {
-			return parse<ben_map>(++cur, process_map);
+			return parse<ben_map>(cur, process_map);
 		}
 		case ben_type_begin::list: {
-			return parse<ben_list>(++cur, process_list);
+			return parse<ben_list>(cur, process_list);
 		}
 		case ben_type_begin::string: {
 			return std::make_unique<ben_string>(parse_next_string(cur));
 		}
-		case ben_type_begin::UNKNOWN:
-		throw std::runtime_error("Parser Error");
+		case ben_type_begin::UNKNOWN: {
+			throw std::runtime_error("Parser Error");
+		}
 	}
 }
+
 
 template <typename Ben_Type, typename Parser>
 std::unique_ptr<Ben_Type> parse(std::string::iterator& cur, Parser& p){
@@ -43,16 +47,17 @@ std::unique_ptr<Ben_Type> parse(std::string::iterator& cur, Parser& p){
 
 
 std::unique_ptr<ben_int> process_int(std::string::iterator& cur){
-	auto b_int = std::make_unique<ben_int>(0);
+	cur++;
 	auto before = cur;
-	while (*++cur != ben_type_end){}
-	b_int->val = std::stol(std::string{before, cur});
+	while (*cur != ben_type_end){cur++;}
+	auto b_int = std::make_unique<ben_int>(ben_int{std::stol(std::string{before, cur})});
 	cur++;
 	return b_int;
 }
 
 
 std::unique_ptr<ben_list> process_list(std::string::iterator& cur){
+	cur++;
 	auto list = std::make_unique<ben_list>(std::vector<std::unique_ptr<ben_item>>{});
 	while (*cur != ben_type_end){
 		auto item = decode(cur);
@@ -71,6 +76,7 @@ std::pair<std::string, std::unique_ptr<ben_item>> decode_pair(std::string::itera
 
 
 std::unique_ptr<ben_map> process_map(std::string::iterator& cur){
+	cur++;
 	auto map = std::make_unique<ben_map>(std::map<std::string, std::unique_ptr<ben_item>>{});
 	while (*cur != ben_type_end){
 		auto pair = decode_pair(cur);
@@ -85,7 +91,7 @@ std::unique_ptr<ben_map> parse_file(std::string file){
 	auto cur = file.begin();
 	switch (fromChar(*cur)) {
 		case ben_type_begin::dict: {
-			return process_map(++cur);
+			return process_map(cur);
 		}
 		default:{
 			std::cout << "No Dictionary at Top Level of File" << std::endl;

@@ -1,5 +1,3 @@
-static_assert(true);
-#pragma pack(push, 1)
 #include <cstdint>
 #include <memory>
 #include <format>
@@ -7,7 +5,9 @@ static_assert(true);
 #include <map>
 #include <vector>
 
+
 const int PIECE_HASH_LENGTH = 20;
+
 
 enum ben_type_begin : char {
 	dict = 'd',
@@ -17,6 +17,7 @@ enum ben_type_begin : char {
 	UNKNOWN = 110
 
 };
+
 
 inline ben_type_begin fromChar(char begin){
 	switch (begin){
@@ -36,6 +37,7 @@ inline ben_type_begin fromChar(char begin){
 	return (std::isdigit(begin) != 0) ? ben_type_begin::string : ben_type_begin::UNKNOWN;
 }
 
+
 const char ben_type_end = 'e';
 
 
@@ -48,6 +50,7 @@ struct ben_item {
 
 }; 
 
+
 template <typename Derived>
 struct ben_node : ben_item {
 	 std::string to_string() final {
@@ -58,6 +61,7 @@ struct ben_node : ben_item {
         return static_cast<const Derived*>(this)->to_ben_string_impl();
     }
 };
+
 
 template <typename T>
 T& expect(ben_item& item) {
@@ -83,6 +87,7 @@ struct ben_int : ben_node<ben_int> {
     
 };
 
+
 struct  ben_string : ben_node<ben_string> {
 	std::string val;
 
@@ -97,6 +102,7 @@ struct  ben_string : ben_node<ben_string> {
 	}
     
 };
+
 
 struct  ben_list : ben_node<ben_list> {
 	std::vector<std::unique_ptr<ben_item>> val;
@@ -125,12 +131,11 @@ struct  ben_list : ben_node<ben_list> {
     
 };
 
+
 struct  ben_map : ben_node<ben_map> {
 	std::map<std::string, std::unique_ptr<ben_item>> val;
 	
 	explicit ben_map(std::map<std::string, std::unique_ptr<ben_item>> val): val(std::move(val))  {}
-
-
 
 	[[nodiscard]] std::string to_string_impl() const{
 		std::string s;
@@ -152,14 +157,13 @@ struct  ben_map : ben_node<ben_map> {
 		return s;
 	}
 
-
 	template <typename T>
 	T& get(const std::string& key) {
 		return expect<T>(*val.at(key));
 	}
 
 };
-#pragma pack(pop)
+
 
 std::unique_ptr<ben_list> process_list(std::string::iterator& cur);
 std::unique_ptr<ben_int> process_int(std::string::iterator& cur);

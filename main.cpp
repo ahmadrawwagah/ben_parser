@@ -11,7 +11,7 @@ int main(){
 	std::stringstream buffer;
 	buffer << meta_file.rdbuf();
 	torrent torrent{buffer.str()};
-	std::cout << torrent.to_string() << std::endl;
+	std::cout << torrent.meta_info_->to_ben_string();
 	return 0;
 }
 
